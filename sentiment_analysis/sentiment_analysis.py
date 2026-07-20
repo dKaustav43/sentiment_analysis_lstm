@@ -7,16 +7,15 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 import torch
 
+#update device fallback - cuda --> MPS ---> CPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# device = torch.device("mps" if torch.backends.mps.is_available() 
-#                       else "cpu")
 
-#loading the imdb dataset
+#loading the imdb dataset - add a function
 base_csv = 'IMDB Dataset.csv'
 df = pd.read_csv(base_csv)
 
-#assigning the X,y values and splitting training and testing set
+#assigning the X,y values and splitting training and testing set - split the training or the test dataset 
 X,y = df['review'].values, df['sentiment'].values
 x_train, x_test, y_train, y_test = train_test_split(X,y,test_size = 0.2,random_state=42)
 x_train, x_val, y_train, y_val = train_test_split(
@@ -27,7 +26,7 @@ print(f'shape of test data is {x_test.shape}')
 print(f'shape of val data is {x_val.shape}')
 
 
-# # Data Pre-processing
+# # Data Pre-processing - NLP knowledge kicks in
 # 
 # 1. Clean text using preprocess_string() function. 
 # 2. Split into tokens.
@@ -197,7 +196,8 @@ counter, cumulative = vocab_coverage_stats(train_tokens)
 # 
 # Transformers don't use this approach. they usually do subword tokenization (BPE, WordPiece).
 
-# Convert Numpy arrays into Torch Tensors
+# Convert Numpy arrays into Torch Tensors - Pytorch basics and RNN architecture - Why RNN? Why better than simple Neural networks? 
+#  How do transformers improve on this? 
 
 X_train_tensor = torch.tensor(x_train_encoded, dtype=torch.long, device=device)
 y_train_tensor = torch.tensor(y_train, dtype=torch.float, device=device)
@@ -230,7 +230,7 @@ print(yb.shape)
 print(xb.dtype)
 
 
-# # Building the Model
+# # Building the Model - Basic building blocks for an LSTM model. 
 
 import torch.nn as nn
 class LSTMClassifier(nn.Module):
@@ -351,7 +351,9 @@ vocab = build_vocab(train_tokens,max_vocab_size=20000)
 #                                   embed_dim=100,
 #                                   hidden_dim=128).to(device)
 
-#Inference function
+
+
+#Inference function/layer.
 
 
 def predict_sentiment(
