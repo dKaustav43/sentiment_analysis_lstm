@@ -63,8 +63,7 @@ counter = Counter()
 tokenized_text = tokenize_text(x_train)
 for token in tokenized_text:
     counter.update(token)
-counter
-
+    
 #vocabulary building with top 20000 unique words
 PAD_TOKEN = "<PAD>"
 UNK_TOKEN = "<UNK>"
@@ -157,8 +156,6 @@ x_train_encoded, y_train, x_val_encoded, y_val, x_test_encoded, y_test = prepare
     x_train,y_train,x_val,y_val, x_test, y_test
 )
 
-x_test_encoded
-
 
 # Building a function to check the unique word coverage
 
@@ -193,8 +190,6 @@ def vocab_coverage_stats(tokenized_texts):
 train_tokens = tokenize_text(x_train)
 
 counter, cumulative = vocab_coverage_stats(train_tokens)
-counter,cumulative
-
 
 # So a max_vocabulary size of 20,000 covers more than 95% of tokens.
 # 
