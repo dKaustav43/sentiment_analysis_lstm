@@ -11,7 +11,7 @@ LSTM model for sentiment analysis on IMDB dataset.
 
 ### 1. Clone the repository
 
-```bash
+```zsh
 git clone https://github.com/dKaustav43/sentiment_analysis_lstm.git
 cd sentiment-analysis-lstm
 ```
