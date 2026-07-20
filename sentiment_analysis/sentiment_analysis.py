@@ -12,7 +12,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 #loading the imdb dataset - add a function
-base_csv = 'IMDB Dataset.csv'
+base_csv = 'data/IMDB Dataset.csv'
 df = pd.read_csv(base_csv)
 
 #assigning the X,y values and splitting training and testing set - split the training or the test dataset 
