@@ -1,0 +1,7 @@
+.venv/
+.git/
+__pycache__/
+.ipynb_checkpoints/
+uv.lock
+imdb_dataset.csv
+simple_rnn_tutorial.ipynb
