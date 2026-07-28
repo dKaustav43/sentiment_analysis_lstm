@@ -1,4 +1,5 @@
 from collections import Counter
+from pre_process_and_tokenize import tokenize_text
 
 #vocabulary building with top 20000 unique words
 PAD_TOKEN = "<PAD>"
@@ -109,3 +110,47 @@ def pad_sequence(sequence, max_length, pad_value=0):
         [5, 3, 4, 0, 0, 0]
     """
     return sequence + [pad_value] * (max_length - len(sequence))
+
+# Full dataset encoding function
+def encode_train_text_val_dataset(
+        x_train_data,
+        x_val_data,
+        x_test_data,
+        max_vocab_size = 20000,
+        max_length = 300
+):
+    """
+    This function tokenizes, generates vocab and finally encodes train, test and val data. 
+    """
+    #tokenize
+    train_tokens = tokenize_text(x_train_data)
+    val_tokens = tokenize_text(x_val_data)
+    test_tokens = tokenize_text(x_test_data)
+
+    #vocab
+    vocab = build_vocab(train_tokens,max_vocab_size)
+
+    #encode
+    X_train_encoded = [
+        pad_sequence(
+            truncation(encode_tokens(tokens,vocab),max_length),
+            max_length
+            )
+            for tokens in train_tokens
+    ]
+    X_val_encoded = [
+        pad_sequence(
+            truncation(encode_tokens(tokens,vocab),max_length),
+            max_length
+            )
+            for tokens in val_tokens
+    ]
+    X_test_encoded = [
+        pad_sequence(
+            truncation(encode_tokens(tokens,vocab),max_length),
+            max_length
+            )
+            for tokens in test_tokens
+    ]
+
+    return X_train_encoded, X_val_encoded, X_test_encoded
