@@ -1,4 +1,6 @@
 import re
+import pandas as pd
+import numpy as np
 
 def preprocess_string(text:str):
     """
@@ -16,7 +18,7 @@ def preprocess_string(text:str):
     return text
 
 
-def tokenize_text(texts:list[str]) -> list[list[str]]:
+def tokenize_text(texts:list[str]|pd.Series|np.ndarray) -> list[list[str]]:
     """
     Preprocess and tokenize a collection of IMDb reviews.
     Eac review is cleaned using 'preprocess_string()
