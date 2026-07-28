@@ -8,8 +8,25 @@ from annotated_types import Interval
 
 def fraction_word_coverage_distribution(texts:list[str]|pd.Series|np.ndarray) -> tuple[list[float],dict]:
     """
-    cummulative[i] is fraction of all tokens that are accounted for by the top i+1 words. 
-    """
+    Compute the cumulative token-coverage distribution for a corpus of texts.
+
+    Tokenizes each text, counts word frequencies across the whole corpus,
+    then builds a cumulative distribution over words sorted by descending
+    frequency. cumulative[i] is the fraction of all tokens accounted for
+    by the top (i+1) most frequent words.
+
+    Args:
+        texts: Collection of raw text documents (e.g. reviews), as a list
+            of strings, a pandas Series, or a numpy array.
+
+    Returns:
+        A tuple of:
+            - cumulative_distribution: array where element i is the fraction
+              of total tokens covered by the top (i+1) most frequent words.
+            - counter: a Counter mapping each unique word to its frequency
+              across the corpus.
+    """ 
+    
     tokenized_texts = tokenize_text(texts)
     all_tokens = []
     #first access the row (which is a single review), then loop over the single review appending each word to a list of all_tokens.
@@ -30,7 +47,21 @@ def fraction_word_coverage_distribution(texts:list[str]|pd.Series|np.ndarray) ->
     return cumulative_distribution, counter
 
 def vocab_coverage_needed(cummulative_distribution:list[float], threshold:Annotated[float, Interval(ge=0,le=1)]):
-    
+    """
+    Find how many top-frequency words are needed to reach a coverage threshold.
+
+    Args:
+        cumulative_distribution: Sorted, monotonically increasing array where
+            element i is the fraction of total tokens covered by the top
+            (i+1) most frequent words (as returned by
+            fraction_word_coverage_distribution).
+        threshold: Target coverage fraction, between 0.0 and 1.0 inclusive
+            (e.g. 0.95 for 95% token coverage).
+
+    Returns:
+        The number of top-frequency words required to reach or exceed the
+        given coverage threshold.
+    """
     idx = np.searchsorted(cummulative_distribution,threshold) + 1
     return idx
     
