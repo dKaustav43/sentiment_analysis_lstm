@@ -6,53 +6,29 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 import torch
+from .text_preprocess import preprocess_string
 
-#update device fallback - cuda --> MPS ---> CPU
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+#set device
+device = torch.device("mps" if torch.mps.is_available() else "cpu")
 
 #loading the imdb dataset - add a function
 base_csv = 'data/IMDB Dataset.csv'
 df = pd.read_csv(base_csv)
 
 #assigning the X,y values and splitting training and testing set - split the training or the test dataset 
-X,y = df['review'].values, df['sentiment'].values
+X = df['review']
+y = df['sentiment'].values
 
 #split for training and testing dataset (80/20)
 x_train, x_test, y_train, y_test = train_test_split(X,y,test_size = 0.2,random_state=42)
 
-#split the training data further into testing, training and validation dataset
+#split the training data further into training and validation dataset
 x_train, x_val, y_train, y_val = train_test_split(
-    x_train, y_train, test_size=0.2, random_state=42)
+    x_train, y_train, test_size=0.1, random_state=42)
 
-print(f'shape of train data is {x_train.shape}')
-print(f'shape of test data is {x_test.shape}')
-print(f'shape of val data is {x_val.shape}')
-
-
-# # Data Pre-processing - NLP knowledge kicks in
-# 
-# 1. Clean text using preprocess_string() function. 
-# 2. Split into tokens.
-# 3. Build a vocabulary by reserving tokens for <PAD> - Padding and
-#     <UNK> - unknown words.
-# 4. Convert to Pytorch Tensors
-# 
-# Typical hyperparameters for IMDB
-# max_vocab_size = 20000
-# max_len = 200
-
-def preprocess_string(text:str):
-    #lowercasing to reduce vocabulary size
-    text = text.lower()
-    #normalize punctuation - keep !,? for sentiment.
-    text = re.sub(r"[^a-z0-9!?']", " ", text)
-    #normalize whitespace
-    text = re.sub(r"\s+", " ", text).strip()
-    #remove html tags
-    text = re.sub(r"<.*?>", "", text) 
-
-    return text    
+# shape of train data is 36000
+# shape of test data is 10000
+# shape of val data is 4000
 
 
 # Checking the token length charecteristics of reviews
