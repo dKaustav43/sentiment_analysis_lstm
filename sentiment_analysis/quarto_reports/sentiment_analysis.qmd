@@ -8,9 +8,78 @@ format:
         code-links:
          - text: Github repo
            repo: https://github.com/dKaustav43/sentiment_analysis_lstm
+         - text: IMDB dataset
+           href: "Dataset from https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews"
 Author: Kaustav Dey
 Date: 
 jupyter: python3
 ---
 
 This report presents highlights and some stats to the sentiment analysis modelling using LSTM. 
+
+# The IMDB dataset 
+
+A quick look at the dataset. This is a standard IMDB dataset often used for tutorials.
+```{python}
+import os
+import sys
+#setting the directory
+os.chdir("../..")
+sys.path.append(os.getcwd())
+
+from great_tables import GT, style, loc
+from sentiment_analysis.load_imdb_data import load_imdb_data_into_df
+
+df_imdb = load_imdb_data_into_df().head(5)
+gt_imdb = GT(df_imdb)
+(
+  gt_imdb.tab_header(
+  title="IMDB Review vs. Sentiment",
+  subtitle= "The top 5 reviews in the dataset"
+)
+.cols_label(
+  review = "Review Text",
+  sentiment = "Sentiment Label"
+)
+.cols_align(align="left")
+.cols_width(review="700px", sentiment="200px")
+# Style 1: Make the main Title look bold, prominent, and dark blue
+.tab_style(
+        style=style.text(weight="bold", size="28px", color="#1a365d"),
+        locations=loc.title()
+    )
+# Style 2: Give the column headers a sleek grey background with uppercase text
+.tab_style(
+        style=[
+            style.fill(color="#f7fafc"),
+            style.text(weight="bold", color="#4a5568", transform="uppercase", size="24px")
+        ],
+        locations=loc.column_header()
+    )
+    # Style 3: Highlight rows to distinguish Positive vs Negative reviews cleanly
+    # (Applies custom text coloring depending on the row data value)
+.tab_style(
+        style=style.text(color="#2f855a", weight="bold"), # Deep Green
+        locations=loc.body(columns="sentiment", rows=lambda df: df["sentiment"] == "positive")
+  )
+.tab_style(
+        style=style.text(color="#c53030", weight="bold"), # Deep Red
+        locations=loc.body(columns="sentiment", rows=lambda df: df["sentiment"] == "negative")
+)
+   # 1. Strong thick line directly underneath the column header titles
+.tab_style(
+        style=style.borders(sides="bottom", color="#2d3748", weight="2px", style="solid"),
+        locations=loc.column_header()
+    )
+    # 2. Clean horizontal grid lines between every row inside the table body
+.tab_style(
+        style=style.borders(sides="bottom", color="#e2e8f0", weight="1px", style="solid"),
+        locations=loc.body()
+    )
+    # 3. Solid, dark closing border at the very bottom of the table data grid
+.tab_style(
+        style=style.borders(sides="bottom", color="#2d3748", weight="2px", style="solid"),
+        locations=loc.body(rows=[4])
+    )
+)
+```
