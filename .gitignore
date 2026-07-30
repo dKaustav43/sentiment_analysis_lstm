@@ -4,3 +4,6 @@ __pycache__/
 *.ipynb
 *.python-version
 experiment/
+sentiment_analysis_files
+.DS_Store
+
