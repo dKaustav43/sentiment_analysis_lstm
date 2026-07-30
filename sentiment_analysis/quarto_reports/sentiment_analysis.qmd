@@ -83,3 +83,21 @@ gt_imdb = GT(df_imdb)
     )
 )
 ```
+# The Dataset characteristics
+```{python}
+from sentiment_analysis.load_imdb_data import load_imdb_data_into_df, train_test_val_set
+import pandas as pd
+
+df_imdb = load_imdb_data_into_df()
+x_train, x_val, x_test, y_train, y_val, y_test = train_test_val_set(df=df_imdb)
+
+dataset_charecteristics = {
+    "Total number of reviews": len(df_imdb),
+    "Training set(X_train)": f"{len(x_train)}",
+    "Testing set(X_test)": f"{len(x_test)}",
+    "Validation set(X_val)": f"{len(x_val)}"
+                              }
+
+df_dataset_characteristics = pd.DataFrame.from_dict(dataset_charecteristics, orient = "index", columns=["Total"])
+df_dataset_characteristics
+```
