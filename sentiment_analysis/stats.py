@@ -1,12 +1,12 @@
 from collections import Counter
 import numpy as np
 import pandas as pd
-from pre_process_and_tokenize import tokenize_text
-from load_imdb_data import load_imdb_data_into_df, train_test_val_set
+from .pre_process_and_tokenize import tokenize_text
+from .load_imdb_data import load_imdb_data_into_df, train_test_val_set
 from typing import Annotated
 from annotated_types import Interval
 
-def fraction_word_coverage_distribution(texts:list[str]|pd.Series|np.ndarray) -> tuple[list[float],dict]:
+def fraction_word_coverage_distribution(texts:list[str]|pd.Series|np.ndarray) -> tuple[list[float],Counter]:
     """
     Compute the cumulative token-coverage distribution for a corpus of texts.
 
