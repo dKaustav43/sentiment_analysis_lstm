@@ -1,0 +1,16 @@
+---
+title: "Sentiment Analysis"
+toc: true
+format:
+    html:
+        code-fold: true
+        code-link: true
+        code-links:
+         - text: Github repo
+           repo: https://github.com/dKaustav43/sentiment_analysis_lstm
+Author: Kaustav Dey
+Date: 
+jupyter: python3
+---
+
+This report presents highlights and some stats to the sentiment analysis modelling using LSTM. 
