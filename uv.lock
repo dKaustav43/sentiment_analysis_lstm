@@ -1618,6 +1618,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "annotated-types" },
     { name = "great-tables" },
+    { name = "ipykernel" },
     { name = "jupyter" },
     { name = "matplotlib" },
     { name = "nltk" },
@@ -1632,6 +1633,7 @@ dependencies = [
 requires-dist = [
     { name = "annotated-types", specifier = ">=0.8.0" },
     { name = "great-tables", specifier = ">=0.23.0" },
+    { name = "ipykernel", specifier = ">=7.3.0" },
     { name = "jupyter", specifier = ">=1.1.1" },
     { name = "matplotlib", specifier = ">=3.11.1" },
     { name = "nltk", specifier = ">=3.9.2" },
