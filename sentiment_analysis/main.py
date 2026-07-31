@@ -4,7 +4,6 @@ from collections import Counter
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
-import torch
 from .vocab_and_encoding import encode_train_text_val_dataset
 from .vocab_and_encoding import build_vocab, encode_tokens, truncation, pad_sequence
 from .load_imdb_data import load_imdb_data_into_df
@@ -39,7 +38,8 @@ def main():
     y_val = np.array([1 if y=="positive" else 0 for y in y_val])
     y_test = np.array([1 if y=="positive" else 0 for y in y_test])
 
-    
+    ### converting to a tensor
+
     X_train_tensor = torch.tensor(x_train_encoded, dtype=torch.long, device=device)
     y_train_tensor = torch.tensor(y_train, dtype=torch.float, device=device)
 
@@ -49,11 +49,10 @@ def main():
     X_test_tensor = torch.tensor(x_test_encoded, dtype=torch.long, device=device)
     y_test_tensor = torch.tensor(y_test, dtype=torch.float, device=device)
 
-
+    # TensorDataset wraps X and y tensors together so that indexing returns matched (input,label)
     train_dataset = TensorDataset(X_train_tensor,y_train_tensor)
     val_dataset = TensorDataset(X_val_tensor,y_val_tensor)
     test_dataset = TensorDataset(X_test_tensor,y_test_tensor)
-
 
     # Creating batches using Dataloader (batch size = 32)
 
@@ -64,12 +63,6 @@ def main():
     val_loader = DataLoader(val_dataset,batch_size, shuffle=True)
 
     test_loader = DataLoader(test_dataset, batch_size, shuffle = True)
-
-    xb , yb = next(iter(train_loader))
-    print(xb.shape)
-    print(yb.shape)
-    print(xb.dtype)
-
 
     # # Building the Model - Basic building blocks for an LSTM model. 
 
