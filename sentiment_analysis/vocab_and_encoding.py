@@ -1,5 +1,5 @@
 from collections import Counter
-from pre_process_and_tokenize import tokenize_text
+from .pre_process_and_tokenize import tokenize_text
 
 #vocabulary building with top 20000 unique words
 PAD_TOKEN = "<PAD>"
@@ -113,12 +113,12 @@ def pad_sequence(sequence, max_length, pad_value=0):
 
 # Full dataset encoding function
 def encode_train_text_val_dataset(
-        x_train_data,
-        x_val_data,
-        x_test_data,
+        x_train_data:list[str],
+        x_val_data:list[str],
+        x_test_data:list[str],
         max_vocab_size = 20000,
         max_length = 300
-):
+) -> tuple[list[list[int]], list[list[int]], list[list[int]]]:
     """
     This function tokenizes, generates vocab and finally encodes train, test and val data. 
     """
