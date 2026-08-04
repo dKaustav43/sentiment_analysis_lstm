@@ -20,31 +20,6 @@ cd sentiment-analysis-lstm
 
 Place `imdb_dataset.csv` from https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews in the project root.
 
-### 3. build Docker image
-docker build -t sentiment-analysis .
-
-### 4. Run the container
-```bash
-docker run --rm -p 8888:8888 -v "$(pwd)":/home/jovyan/work sentiment-analysis:v1
-```
-
-**On Windows, use:**
-```bash
-docker run --rm -p 8888:8888 -v "%cd%":/home/jovyan/work sentiment-analysis:v1
-```
-
-### 5. Access jupyter notebook
-- Open your browser to `http://localhost:8888`
-- Copy the token from the terminal output
-- Open `sentiment_analysis.ipynb`
-
-## Stopping the Container
-
-Press `Ctrl+C` in the terminal where the container is running.
-
-
-Access Jupyter at http://localhost:8888
-
 ## Notes
 
 - The CSV file is not included in the repository (too large)
