@@ -1,5 +1,6 @@
 from collections import Counter
 from pre_process_and_tokenize import tokenize_text
+from loading_data_converting_tensor_utils import load_imdb_data_into_df, train_test_val_set
 
 #vocabulary building with top 20000 unique words
 PAD_TOKEN = "<PAD>"
@@ -88,7 +89,7 @@ def truncation(sequence:list[int], max_length:int) -> list[int]:
     return sequence[:max_length]
 
 #padding (make fixed length)
-def pad_sequence(sequence:list[int], max_length, pad_value=0):
+def pad_sequence(sequence:list[int], max_length, pad_value=0) -> list[int]:
     """
     Pad a sequence to a fixed length.
 
@@ -111,16 +112,39 @@ def pad_sequence(sequence:list[int], max_length, pad_value=0):
     """
     return sequence + [pad_value] * (max_length - len(sequence))
 
+#imdb vocab out of X_train dataset
+
+def imdb_vocab() -> dict[str,int]:
+    """
+    This standalone function builds the vocabulary from the training data of IMDB dataset.
+    This will be used by other functions for example to encode tokens before training and inference.
+
+    Output:
+        Vocab:dict 
+        example: {"PAD_TOKEN" : 0,
+                "UNK_TOKEN" : 1,
+                "The" : 3,
+                ...}
+    """
+    
+    df_imdb = load_imdb_data_into_df()
+    # train-test-val split
+    x_train, x_val, x_test, y_train, y_val, y_test = train_test_val_set(df = df_imdb)
+    x_training_imdb_tokenized = tokenize_text(x_train)
+    vocab_imdb = build_vocab(tokenized_texts=x_training_imdb_tokenized)
+
+    return vocab_imdb
+
+
 # Full dataset encoding function
 def encode_train_text_val_dataset(
         x_train_data:list[str],
         x_val_data:list[str],
         x_test_data:list[str],
-        max_vocab_size = 20000,
         max_length = 300
 ) -> tuple[list[list[int]], list[list[int]], list[list[int]]]:
     """
-    This function tokenizes, generates vocab and finally encodes train, test and val data. 
+    This function tokenizes training, validation and testing datasets and then encodes them to uniform length sequences.  
     """
     #tokenize
     train_tokens = tokenize_text(x_train_data)
@@ -128,7 +152,7 @@ def encode_train_text_val_dataset(
     test_tokens = tokenize_text(x_test_data)
 
     #vocab
-    vocab = build_vocab(train_tokens,max_vocab_size)
+    vocab = imdb_vocab()
 
     #encode
     X_train_encoded = [
