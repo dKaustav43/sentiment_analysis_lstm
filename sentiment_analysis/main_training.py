@@ -1,10 +1,7 @@
-import numpy as np
 import torch
 import torch.nn as nn
 import time
-from torch.utils.data import DataLoader, TensorDataset
 
-from vocab_and_encoding_functions import encode_train_text_val_dataset
 from loading_data_converting_tensor_utils import (load_imdb_data_into_df, 
                                                   train_test_val_set,
                                                   encoding_data, 
