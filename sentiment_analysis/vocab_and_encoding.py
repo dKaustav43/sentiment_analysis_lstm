@@ -1,5 +1,5 @@
 from collections import Counter
-from .pre_process_and_tokenize import tokenize_text
+from pre_process_and_tokenize import tokenize_text
 
 #vocabulary building with top 20000 unique words
 PAD_TOKEN = "<PAD>"
