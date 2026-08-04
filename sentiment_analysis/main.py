@@ -3,11 +3,73 @@ from sklearn.model_selection import train_test_split
 from collections import Counter
 import numpy as np
 import torch
+import torch.nn as nn
+import time
 from torch.utils.data import DataLoader, TensorDataset
 from .vocab_and_encoding import encode_train_text_val_dataset
 from .vocab_and_encoding import build_vocab, encode_tokens, truncation, pad_sequence
 from .load_imdb_data import load_imdb_data_into_df
+from .lstm_model import LSTMClassifier
 
+
+## training loop
+def training_loop(epochs:int, 
+                  classifier_model:nn.Module, 
+                  train_loader,
+                  val_loader,
+                  optimizer,
+                  loss_fn,
+                  device,
+                  seed:int = 42):
+    
+    torch.manual_seed(seed)
+
+    for epoch in range(epochs):
+ 
+        classifier_model.train()
+        train_loss = 0.0
+
+        for X_batch, y_batch in train_loader:
+
+            X_batch = X_batch.to(device)
+            y_batch = y_batch.to(device)
+
+            optimizer.zero_grad()
+
+            logits = classifier_model(X_batch).squeeze(1) #squeezing the dimension to match shape of the labels
+            loss = loss_fn(logits,y_batch)
+
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(classifier_model.parameters(), max_norm=1.0) #limits the maximum value of gradient to 1.0 and hence preventing vanishing gradients.
+            optimizer.step() #update the model weights and biases.
+
+            train_loss += loss.item()
+
+        #validation 
+        classifier_model.eval()
+        val_loss = 0.0
+        correct = 0
+        total = 0 
+
+        with torch.no_grad():
+            for X_batch, y_batch in val_loader:
+                X_batch = X_batch.to(device)
+                y_batch = y_batch.to(device)
+
+                logits = classifier_model(X_batch).squeeze(1)
+                loss = loss_fn(logits,y_batch)
+                val_loss += loss.item()
+
+                preds = (torch.sigmoid(logits)>0.50).long() # .long() converts dtype to a 64-bit integer hence forcing prob<0.50 to 0 and prob>0.50 to 1.
+                correct += (preds == y_batch.long()).sum().item() # adding the correct predictions
+                total += y_batch.size(0) # adding the total size of each batch
+
+        print(
+            f"Epoch {epoch+1} | "
+            f"Train loss: {train_loss/len(train_loader):.4f} | "
+            f"Val Loss: {val_loss/len(val_loader):.4f} |"
+            f"Val Acc: {correct/total:.4f}"
+        )   
 
 def main():
 
@@ -64,85 +126,75 @@ def main():
 
     test_loader = DataLoader(test_dataset, batch_size, shuffle = True)
 
-    # # Building the Model - Basic building blocks for an LSTM model. 
-
-    import torch.nn as nn
-    class LSTMClassifier(nn.Module):
-        def __init__(self, vocab_size, embed_dim=100, hidden_dim=128):
-            super().__init__()
-
-            self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=0)
-            self.LSTM = nn.LSTM(embed_dim, hidden_dim, batch_first=True)
-            self.fc = nn.Linear(hidden_dim,1) # 1-logit output is enough as it is binary cross-entropy. 
-
-        def forward(self,x):
-            x = self.embedding(x)
-            x,(h,c) = self.LSTM(x) # x-output, h-hidden layer, c-final cell states.
-            return self.fc(h[-1]) # h[-1]:last LSTM layers final hidden state.
-        #the final hidden state encodes the sentiment-relevant information accumulated over the whole sequence.
+    #Initialising the LSTM classifier model 
 
     classifier_model = LSTMClassifier(vocab_size=20002,
                                     embed_dim=100,
                                     hidden_dim=128).to(device)
-    print(classifier_model)
 
     #setup loss and optimizer
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(classifier_model.parameters(),lr=0.001)
 
-    #training loop
+    #### training 
+    training_start_time = time.perf_counter()
+    training_loop(epochs=5, 
+                  classifier_model=classifier_model, 
+                  train_loader=train_loader,
+                  val_loader = val_loader,
+                  optimizer=optimizer,
+                  loss_fn=loss_fn,
+                  device=device,
+                  seed=42)
+    training_end_time = time.perf_counter()
+   
+    print(f"time taken to run the training loop: {training_end_time - training_start_time}s")
+    # for epoch in range(epochs):
+ 
+    #     classifier_model.train()
+    #     train_loss = 0.0
 
-    torch.manual_seed(42)
-    epochs = 10
+    #     for X_batch, y_batch in train_loader:
 
+    #         X_batch = X_batch.to(device)
+    #         y_batch = y_batch.to(device)
 
-    for epoch in range(epochs):
+    #         optimizer.zero_grad()
 
-        #training 
-        classifier_model.train()
-        train_loss = 0.0
+    #         logits = classifier_model(X_batch).squeeze(1) #squeezing the dimension to match shape of the labels
+    #         loss = loss_fn(logits,y_batch)
 
-        for X_batch, y_batch in train_loader:
+    #         loss.backward()
+    #         torch.nn.utils.clip_grad_norm_(classifier_model.parameters(), max_norm=1.0) #limits the maximum value of gradient to 1.0 and hence preventing vanishing gradients.
+    #         optimizer.step() #update the model weights and biases.
 
-            X_batch = X_batch.to(device)
-            y_batch = y_batch.to(device)
+    #         train_loss += loss.item()
 
-            optimizer.zero_grad()
+    #     #validation 
+    #     classifier_model.eval()
+    #     val_loss = 0.0
+    #     correct = 0
+    #     total = 0 
 
-            logits = classifier_model(X_batch).squeeze(1)
-            loss = loss_fn(logits,y_batch)
+    #     with torch.no_grad():
+    #         for X_batch, y_batch in val_loader:
+    #             X_batch = X_batch.to(device)
+    #             y_batch = y_batch.to(device)
 
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(classifier_model.parameters(), max_norm=1.0)
-            optimizer.step()
+    #             logits = classifier_model(X_batch).squeeze(1)
+    #             loss = loss_fn(logits,y_batch)
+    #             val_loss += loss.item()
 
-            train_loss += loss.item()
+    #             preds = (torch.sigmoid(logits)>0.50).long() # .long() converts dtype to a 64-bit integer hence forcing prob<0.50 to 0 and prob>0.50 to 1.
+    #             correct += (preds == y_batch.long()).sum().item() # adding the correct predictions
+    #             total += y_batch.size(0) # adding the total size of each batch
 
-        #validation 
-        classifier_model.eval()
-        val_loss = 0.0
-        correct = 0
-        total = 0 
-
-        with torch.no_grad():
-            for X_batch, y_batch in val_loader:
-                X_batch = X_batch.to(device)
-                y_batch = y_batch.to(device)
-
-                logits = classifier_model(X_batch).squeeze(1)
-                loss = loss_fn(logits,y_batch)
-                val_loss += loss.item()
-
-                preds = (torch.sigmoid(logits)>0.50).long()
-                correct += (preds == y_batch.long()).sum().item()
-                total += y_batch.size(0)
-
-        print(
-            f"Epoch {epoch+1} | "
-            f"Train loss: {train_loss/len(train_loader):.4f} | "
-            f"Val Loss: {val_loss/len(val_loader):.4f} |"
-            f"Val Acc: {correct/total:.4f}"
-        )   
+    #     print(
+    #         f"Epoch {epoch+1} | "
+    #         f"Train loss: {train_loss/len(train_loader):.4f} | "
+    #         f"Val Loss: {val_loss/len(val_loader):.4f} |"
+    #         f"Val Acc: {correct/total:.4f}"
+    #     )   
 
 
     # Around 10 Epochs are enough for the training. 
@@ -152,75 +204,75 @@ def main():
     # Evaluate one on the test set. Reporting on accuracy, Precision/Recall/F1.
 
     #validation 
-    classifier_model.eval()
-    test_loss = 0.0
-    correct = 0
-    total = 0 
+    # classifier_model.eval()
+    # test_loss = 0.0
+    # correct = 0
+    # total = 0 
 
-    with torch.no_grad():
-        for X_batch, y_batch in test_loader:
-            X_batch = X_batch.to(device)
-            y_batch = y_batch.to(device)
+    # with torch.no_grad():
+    #     for X_batch, y_batch in test_loader:
+    #         X_batch = X_batch.to(device)
+    #         y_batch = y_batch.to(device)
 
-            logits = classifier_model(X_batch).squeeze(1)
-            loss = loss_fn(logits,y_batch)
-            test_loss += loss.item()
+    #         logits = classifier_model(X_batch).squeeze(1)
+    #         loss = loss_fn(logits,y_batch)
+    #         test_loss += loss.item()
 
-            preds = (torch.sigmoid(logits)>0.50).long()
-            correct += (preds == y_batch.long()).sum().item()
-            total += y_batch.size(0)
+    #         preds = (torch.sigmoid(logits)>0.50).long()
+    #         correct += (preds == y_batch.long()).sum().item()
+    #         total += y_batch.size(0)
 
-        print(
-            f"Test loss: {test_loss/len(train_loader):.4f} | "
-            f"Test Acc: {correct/total:.4f}"
-        )   
-
-
-
-    vocab = build_vocab(train_tokens,max_vocab_size=20000)
-
-
-    # Saving the model
-    # classifier_model = LSTMClassifier(vocab_size=20002,  # +2 for PAD and UNK
-    #                                   embed_dim=100,
-    #                                   hidden_dim=128).to(device)
+    #     print(
+    #         f"Test loss: {test_loss/len(train_loader):.4f} | "
+    #         f"Test Acc: {correct/total:.4f}"
+    #     )   
 
 
 
-    #Inference function/layer.
+    # vocab = build_vocab(train_tokens,max_vocab_size=20000)
 
 
-    def predict_sentiment(
-            text:str,
-            vocab=vocab,
-            max_length=300,
-            device=device
-    ):
-        classifier_model.eval()
-        #tokenize
-        tokens = text.lower().split()
-
-        #encode
-        encoded = encode_tokens(tokens, vocab)
-        encoded = truncation(encoded, max_length)
-        encoded = pad_sequence(encoded, max_length)
+    # # Saving the model
+    # # classifier_model = LSTMClassifier(vocab_size=20002,  # +2 for PAD and UNK
+    # #                                   embed_dim=100,
+    # #                                   hidden_dim=128).to(device)
 
 
-        x = torch.tensor(encoded).unsqueeze(0).to(device)
 
-        with torch.no_grad():
-            logit = classifier_model(x).squeeze()
-            prob = torch.sigmoid(logit).item()
-
-        label = "positive" if prob >= 0.5 else "negetive"
-
-        return label, prob
+    # #Inference function/layer.
 
 
-    label,prob = predict_sentiment(
-        "The movie was was well done!"
-    )
-    print(label,prob)
+    # def predict_sentiment(
+    #         text:str,
+    #         vocab=vocab,
+    #         max_length=300,
+    #         device=device
+    # ):
+    #     classifier_model.eval()
+    #     #tokenize
+    #     tokens = text.lower().split()
+
+    #     #encode
+    #     encoded = encode_tokens(tokens, vocab)
+    #     encoded = truncation(encoded, max_length)
+    #     encoded = pad_sequence(encoded, max_length)
+
+
+    #     x = torch.tensor(encoded).unsqueeze(0).to(device)
+
+    #     with torch.no_grad():
+    #         logit = classifier_model(x).squeeze()
+    #         prob = torch.sigmoid(logit).item()
+
+    #     label = "positive" if prob >= 0.5 else "negetive"
+
+    #     return label, prob
+
+
+    # label,prob = predict_sentiment(
+    #     "The movie was was well done!"
+    # )
+    # print(label,prob)
 
 
 if __name__ == main():
