@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from vocab_and_encoding import encode_train_text_val_dataset
 from load_imdb_data import load_imdb_data_into_df
 from lstm_model import LSTMClassifier
-from training import training_loop
+from sentiment_analysis.training_function import training_loop
 
 
 def main():
