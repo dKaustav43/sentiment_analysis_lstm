@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-## training loop
+from pathlib import Path
+
 def training_loop(epochs:int, 
                   classifier_model:nn.Module, 
                   train_loader:DataLoader,
@@ -9,12 +10,13 @@ def training_loop(epochs:int,
                   optimizer,
                   loss_fn,
                   device,
+                  path_trained_model:str|Path,
                   seed:int = 42):
     
     torch.manual_seed(seed)
 
     for epoch in range(epochs):
- 
+        ##### Training phase #####
         classifier_model.train()
         train_loss = 0.0
 
@@ -29,12 +31,12 @@ def training_loop(epochs:int,
             loss = loss_fn(logits,y_batch)
 
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(classifier_model.parameters(), max_norm=1.0) #limits the maximum value of gradient to 1.0 and hence preventing vanishing gradients.
+            torch.nn.utils.clip_grad_norm_(classifier_model.parameters(), max_norm=1.0) #limits the maximum value of gradient to 1.0 and hence preventing exploding gradients.
             optimizer.step() #update the model weights and biases.
 
             train_loss += loss.item()
 
-        #validation 
+        ##### validation phase ##### 
         classifier_model.eval()
         val_loss = 0.0
         correct = 0
@@ -58,4 +60,7 @@ def training_loop(epochs:int,
             f"Train loss: {train_loss/len(train_loader):.4f} | "
             f"Val Loss: {val_loss/len(val_loader):.4f} |"
             f"Val Acc: {correct/total:.4f}"
-        )   
+        )
+    trained_classifier = classifier_model
+    torch.save(trained_classifier.state_dict(),path_trained_model)
+    return trained_classifier   
