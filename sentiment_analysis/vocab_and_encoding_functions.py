@@ -88,7 +88,7 @@ def truncation(sequence:list[int], max_length:int) -> list[int]:
     return sequence[:max_length]
 
 #padding (make fixed length)
-def pad_sequence(sequence, max_length, pad_value=0):
+def pad_sequence(sequence:list[int], max_length, pad_value=0):
     """
     Pad a sequence to a fixed length.
 
