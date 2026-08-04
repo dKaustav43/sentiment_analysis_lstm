@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from vocab_and_encoding import encode_train_text_val_dataset
 from load_imdb_data import load_imdb_data_into_df
 from lstm_model import LSTMClassifier
-from sentiment_analysis.training_function import training_loop
+from training_function import training_loop
 
 
 def main():
@@ -79,28 +79,25 @@ def main():
 
     #### training 
     training_start_time = time.perf_counter()
-    training_loop(epochs=10, 
+    trained_classifier_model = training_loop(
+                  epochs=9, #epoch set to 9 train loss decreases but validation loss increases 
                   classifier_model=classifier_model, 
                   train_loader=train_loader,
                   val_loader = val_loader,
                   optimizer=optimizer,
                   loss_fn=loss_fn,
                   device=device,
-                  seed=42)
+                  path_trained_model= "sentiment_analysis/trained_models/lstm_epoch_9.pt",
+                  seed=42
+                  )
     training_end_time = time.perf_counter()
    
     print(f"time taken to run the training loop: {training_end_time - training_start_time}s")
+
     
+    #Evaluate one on the test set. Reporting on accuracy, Precision/Recall/F1.
 
-
-    # Around 10 Epochs are enough for the training. 
-
-    # # Final Evaluation
-
-    # Evaluate one on the test set. Reporting on accuracy, Precision/Recall/F1.
-
-    #validation 
-    # classifier_model.eval()
+    # trained_classifier_model.eval()
     # test_loss = 0.0
     # correct = 0
     # total = 0 
@@ -110,7 +107,7 @@ def main():
     #         X_batch = X_batch.to(device)
     #         y_batch = y_batch.to(device)
 
-    #         logits = classifier_model(X_batch).squeeze(1)
+    #         logits = trained_classifier_model(X_batch).squeeze(1)
     #         loss = loss_fn(logits,y_batch)
     #         test_loss += loss.item()
 
