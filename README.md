@@ -19,9 +19,3 @@ cd sentiment-analysis-lstm
 ### 2. Add Your Dataset
 
 Place `imdb_dataset.csv` from https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews in the project root.
-
-## Notes
-
-- The CSV file is not included in the repository (too large)
-- All changes to the notebook are saved to your local machine
-- Container is automatically removed after stopping (due to `--rm` flag)
