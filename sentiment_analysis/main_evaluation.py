@@ -1,17 +1,14 @@
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import time
 
 from lstm_model import LSTMClassifier
-from loading_data_converting_tensor_utils import (load_imdb_data_into_df, 
-                                                train_test_val_set, 
-                                                encoding_data, 
-                                                converting_data_to_tensor, 
-                                                dataloader_batches)
-
-# Evaluate one on the test set. Reporting on accuracy, Precision/Recall/F1.
-
+from loading_imdb_train_test_val_split import load_imdb_data_into_df, train_test_val_set
+from vocab_and_encoding_functions import encode_train_text_val_dataset
+from tensor_and_dataloader import converting_data_to_tensor, dataloader_batches
+                                               
 def eval_on_test_set(
         trained_classifier_model:nn.Module,
         test_loader:DataLoader,
@@ -51,9 +48,11 @@ def main():
 
     x_train, x_val, x_test, y_train, y_val, y_test = train_test_val_set(df=df_imdb)
 
-    x_train_encoded, x_val_encoded, x_test_encoded, y_train_encoded, y_val_encoded, y_test_encoded = encoding_data(
-                                                                                x_train, x_val, x_test, y_train, y_val, y_test   
-                                                                                )
+    x_train_encoded, x_val_encoded, x_test_encoded = encode_train_text_val_dataset(x_train, x_val, x_test)
+    
+    y_train_encoded = np.array([1 if y == "positive" else 0 for y in y_train])
+    y_val_encoded = np.array([1 if y=="positive" else 0 for y in y_val])
+    y_test_encoded = np.array([1 if y=="positive" else 0 for y in y_test])
 
     X_train_tensor, X_val_tensor, X_test_tensor, y_train_tensor, y_val_tensor, y_test_tensor = converting_data_to_tensor(
       x_train_encoded, x_val_encoded, x_test_encoded, y_train_encoded, y_val_encoded, y_test_encoded,
@@ -64,9 +63,7 @@ def main():
                                                                batch_size=32)
 
 
-    lstm_model_instance = LSTMClassifier(vocab_size=20002,
-                                    embed_dim=100,
-                                    hidden_dim=128).to(device)
+    lstm_model_instance = LSTMClassifier().to(device)
     
     lstm_model_instance.load_state_dict(torch.load(path_trained_model, weights_only=True))
 
