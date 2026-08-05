@@ -2,7 +2,7 @@ import torch.nn as nn
 
 class LSTMClassifier(nn.Module):
     
-    def __init__(self, vocab_size, embed_dim=100, hidden_dim=128):
+    def __init__(self, vocab_size=20002, embed_dim=100, hidden_dim=128):
         super().__init__()
 
         self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=0)
