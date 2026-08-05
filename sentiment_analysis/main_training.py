@@ -1,12 +1,13 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import time
 
-from loading_data_converting_tensor_utils import (load_imdb_data_into_df, 
-                                                  train_test_val_set,
-                                                  encoding_data, 
-                                                 converting_data_to_tensor, 
-                                                 dataloader_batches)
+from loading_imdb_train_test_val_split import (load_imdb_data_into_df, 
+                                              train_test_val_set, 
+                                                 )
+from vocab_and_encoding_functions import encode_train_text_val_dataset
+from tensor_and_dataloader import converting_data_to_tensor, dataloader_batches
 from lstm_model import LSTMClassifier
 from training_function import training_loop
 
@@ -20,10 +21,15 @@ def main():
     # train-test-val split
     x_train, x_val, x_test, y_train, y_val, y_test = train_test_val_set(df=df_imdb)
 
-    # converting raw data into encodings
-    x_train_encoded, x_val_encoded, x_test_encoded, y_train_encoded, y_val_encoded, y_test_encoded = encoding_data(
-                                                                                x_train, x_val, x_test, y_train, y_val, y_test   
-                                                                                )
+    # encoding data
+    x_train_encoded, x_val_encoded, x_test_encoded = encode_train_text_val_dataset(
+                                                                                   x_train_data = x_train,
+                                                                                    x_val_data = x_val,
+                                                                                    x_test_data = x_test
+                                                                                    )
+    y_train_encoded = np.array([1 if y == "positive" else 0 for y in y_train])
+    y_val_encoded = np.array([1 if y=="positive" else 0 for y in y_val])
+    y_test_encoded = np.array([1 if y=="positive" else 0 for y in y_test])
 
     # converting encoded data to tensor
     X_train_tensor, X_val_tensor, X_test_tensor, y_train_tensor, y_val_tensor, y_test_tensor = converting_data_to_tensor(
@@ -38,9 +44,7 @@ def main():
 
     #Initialising the LSTM classifier model 
 
-    classifier_model = LSTMClassifier(vocab_size=20002,
-                                    embed_dim=100,
-                                    hidden_dim=128).to(device)
+    classifier_model = LSTMClassifier().to(device)
 
     #setup loss and optimizer
     loss_fn = nn.BCEWithLogitsLoss()
