@@ -1,13 +1,44 @@
+import re
+import pandas as pd
+import numpy as np
+from numpy.typing import NDArray
 from collections import Counter
-from pre_process_and_tokenize import tokenize_text
-from loading_data_converting_tensor_utils import load_imdb_data_into_df, train_test_val_set
+from sentiment_analysis.loading_imdb_train_test_val_split import load_imdb_data_into_df, train_test_val_set
+
+##### Pre-processing text and tokenisation utils #####
+
+def preprocess_string(text:str) -> str:
+    """
+    A basic script to clean and normalize texts.
+    """
+    #lowercasing to reduce vocabulary size
+    text = text.lower()
+    #normalize punctuation - keep !,? for sentiment.
+    text = re.sub(r"[^a-z0-9!?']", " ", text)
+    #normalize whitespace
+    text = re.sub(r"\s+", " ", text).strip()
+    #remove html tags
+    text = re.sub(r"<.*?>", "", text) 
+
+    return text
+
+
+def tokenize_text(texts:list[str]| pd.Series[str]| NDArray[np.str_]) -> list[list[str]]:
+    """
+    Preprocess and tokenize a collection of IMDb reviews.
+    Eac review is cleaned using 'preprocess_string()
+    and then split into a list of white-space separated tokens. 
+    """
+    return [preprocess_string(text).split() for text in texts]
+
+##### Building custom IBMD vocabulary util #####
 
 #vocabulary building with top 20000 unique words
 PAD_TOKEN = "<PAD>"
 UNK_TOKEN = "<UNK>"
 
 def build_vocab(tokenized_texts:list[list[str]], max_vocab_size = 20000) -> dict[str,int]:
-    """
+    """ 
     Building the vocab includes the following steps:
     1. Counter is used to provide a dictionary of word frequencies.
     2. Vocab is a dictionary of top 20,000 most common words in IMDb review set with corresponding ID's.
@@ -41,7 +72,31 @@ def build_vocab(tokenized_texts:list[list[str]], max_vocab_size = 20000) -> dict
 
     return vocab
 
-#encoding tokens - list[str] --> list[int]
+##### The IMDB vocabulary #### 
+
+def imdb_vocab() -> dict[str,int]:
+    """ (This will be seaparated out into a script later.)
+    This standalone function builds the vocabulary from the training data of IMDB dataset.
+    This will be used by other functions for example to encode tokens before training and inference.
+
+    Output:
+        Vocab:dict 
+        example: {"PAD_TOKEN" : 0,
+                "UNK_TOKEN" : 1,
+                "The" : 3,
+                ...}
+    """
+    
+    df_imdb = load_imdb_data_into_df()
+    # train-test-val split
+    x_train, x_val, x_test, y_train, y_val, y_test = train_test_val_set(df = df_imdb)
+    x_training_imdb_tokenized = tokenize_text(x_train)
+    vocab_imdb = build_vocab(tokenized_texts=x_training_imdb_tokenized)
+
+    return vocab_imdb
+
+
+##### Encoding Word Tokens Utils #####
 def encode_tokens(tokens:list[str],vocab:dict[str,int]) -> list[int]:
     """
     Encode a sequence of tokens into their corresponding integer indices.
@@ -66,8 +121,6 @@ def encode_tokens(tokens:list[str],vocab:dict[str,int]) -> list[int]:
     unk_idx = vocab[UNK_TOKEN]
     return [vocab.get(word,unk_idx) for word in tokens]
 
-
-#truncation (control sequence length)
 def truncation(sequence:list[int], max_length:int) -> list[int]:
     """
     Truncate a sequence to a maximum length.
@@ -88,7 +141,6 @@ def truncation(sequence:list[int], max_length:int) -> list[int]:
     """
     return sequence[:max_length]
 
-#padding (make fixed length)
 def pad_sequence(sequence:list[int], max_length, pad_value=0) -> list[int]:
     """
     Pad a sequence to a fixed length.
@@ -112,30 +164,7 @@ def pad_sequence(sequence:list[int], max_length, pad_value=0) -> list[int]:
     """
     return sequence + [pad_value] * (max_length - len(sequence))
 
-#imdb vocab out of X_train dataset
-
-def imdb_vocab() -> dict[str,int]:
-    """
-    This standalone function builds the vocabulary from the training data of IMDB dataset.
-    This will be used by other functions for example to encode tokens before training and inference.
-
-    Output:
-        Vocab:dict 
-        example: {"PAD_TOKEN" : 0,
-                "UNK_TOKEN" : 1,
-                "The" : 3,
-                ...}
-    """
-    
-    df_imdb = load_imdb_data_into_df()
-    # train-test-val split
-    x_train, x_val, x_test, y_train, y_val, y_test = train_test_val_set(df = df_imdb)
-    x_training_imdb_tokenized = tokenize_text(x_train)
-    vocab_imdb = build_vocab(tokenized_texts=x_training_imdb_tokenized)
-
-    return vocab_imdb
-
-
+##### Custom function to encode IMDB dataset before Tensorisation #####
 # Full dataset encoding function
 def encode_train_text_val_dataset(
         x_train_data:list[str],
