@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from numpy.typing import NDArray
 from collections import Counter
-from sentiment_analysis.loading_imdb_train_test_val_split import load_imdb_data_into_df, train_test_val_set
+from loading_imdb_train_test_val_split import load_imdb_data_into_df, train_test_val_set
 
 ##### Pre-processing text and tokenisation utils #####
 
