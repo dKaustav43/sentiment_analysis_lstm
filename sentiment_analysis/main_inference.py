@@ -1,22 +1,21 @@
 import torch
 import torch.nn as nn
 import time
-from vocab_and_encoding_functions import imdb_vocab, encode_tokens, pad_sequence, truncation
-from pre_process_and_tokenize import tokenize_text
+from vocab_and_encoding_functions import (tokenize_text,imdb_vocab, encode_tokens, 
+                                          pad_sequence, truncation)
 from lstm_model import LSTMClassifier
 
 def predict_sentiment_batch(
     texts: list[str], 
     classifier_model: nn.Module, 
+    device,
     vocab = imdb_vocab(), 
     pad_length: int = 300, # set during the training
-
-) -> list[dict]:
+    ) -> list[dict]:
     """
     Takes a list of raw strings representing reviews, runs them through the trained model as a single batch,
     and returns a list of dictionaries containing the prediction results.
-    """
-    device = torch.device("mps" if torch.mps.is_available() else "cpu")
+    """ 
     
     # Eval mode
     classifier_model.eval()
@@ -60,22 +59,17 @@ def predict_sentiment_batch(
     return results
 
 def main():
+    device = torch.device("mps" if torch.mps.is_available() else "cpu")
+    path_trained_model= "sentiment_analysis/trained_models/lstm_epoch_9.pt"
+    lstm_model_instance = LSTMClassifier().to(device)
+    lstm_model_instance.load_state_dict(torch.load(path_trained_model, weights_only=True))
+
     test_reviews = ["The movie was a wonderful watch. I highly recommend!",
                     "I felt the movie was boring. Acting could have been better!",
                     "The movie was okay!"]
     
-    device = torch.device("mps" if torch.mps.is_available() else "cpu")
-
-    path_trained_model= "sentiment_analysis/trained_models/lstm_epoch_9.pt"
-
-    lstm_model_instance = LSTMClassifier(vocab_size=20002,
-                                    embed_dim=100,
-                                    hidden_dim=128).to(device)
-    
-    lstm_model_instance.load_state_dict(torch.load(path_trained_model, weights_only=True))
-    
     start_inference_time = time.perf_counter()
-    results = predict_sentiment_batch(texts=test_reviews, classifier_model=lstm_model_instance)
+    results = predict_sentiment_batch(texts=test_reviews, classifier_model=lstm_model_instance, device=device)
     end_inference_time = time.perf_counter()
     print(f"total inference time is:{end_inference_time -start_inference_time}s")
     print(results)
