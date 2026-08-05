@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader, TensorDataset
 import time
 from pathlib import Path
 from sklearn.model_selection import train_test_split
-from vocab_and_encoding_functions import encode_train_text_val_dataset
+
 
 path_to_data = 'data/IMDB Dataset.csv'
 def load_imdb_data_into_df(path:str|Path = path_to_data) -> pd.DataFrame:
@@ -34,6 +34,9 @@ def train_test_val_set(df:pd.DataFrame):
     return x_train, x_val, x_test, y_train, y_val, y_test
 
 def encoding_data(x_train,x_val,x_test,y_train,y_val,y_test):
+
+    from vocab_and_encoding_functions import encode_train_text_val_dataset
+    
     x_train_encoded, x_val_encoded, x_test_encoded = encode_train_text_val_dataset(
                                                                                     x_train_data = x_train,
                                                                                     x_val_data = x_val,
