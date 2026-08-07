@@ -58,7 +58,15 @@ def predict_sentiment_batch(
         
     return results
 
-def main():
+def infer_movie_sentiment(texts: list[str]):
+    """
+    Runs the inference for a given list of movie review texts.
+    Returns: a list[dict] 
+        where each dict object is 
+            text: The movie review
+            label: Postive or Negetive
+            confidence: probablity
+    """
     device = torch.device("mps" if torch.mps.is_available() else "cpu")
     path_trained_model= "sentiment_analysis/trained_models/lstm_epoch_9.pt"
     lstm_model_instance = LSTMClassifier().to(device)
@@ -73,6 +81,24 @@ def main():
     end_inference_time = time.perf_counter()
     print(f"total inference time is:{end_inference_time -start_inference_time}s")
     print(results)
+
+def main():
+    # device = torch.device("mps" if torch.mps.is_available() else "cpu")
+    # path_trained_model= "sentiment_analysis/trained_models/lstm_epoch_9.pt"
+    # lstm_model_instance = LSTMClassifier().to(device)
+    # lstm_model_instance.load_state_dict(torch.load(path_trained_model, weights_only=True))
+
+    test_reviews = ["The movie was a wonderful watch. I highly recommend!",
+                    "I felt the movie was boring. Acting could have been better!",
+                    "The movie was okay!"]
+    
+    # start_inference_time = time.perf_counter()
+    # results = predict_sentiment_batch(texts=test_reviews, classifier_model=lstm_model_instance, device=device)
+    # end_inference_time = time.perf_counter()
+    # print(f"total inference time is:{end_inference_time -start_inference_time}s")
+    # print(results)
+
+    infer_movie_sentiment(texts=test_reviews)
 
 if __name__ == "__main__":
     main()
