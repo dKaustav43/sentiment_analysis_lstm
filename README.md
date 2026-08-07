@@ -8,7 +8,7 @@ The data is in the data/ folder.
 ## Project Setup and Execution Guide
 
 This guide explains how to clone the repository, synchronize the environment,
-and run the project scripts using Windows PowerShell and UV.
+and run the project scripts.
 
 ## Repository
 
@@ -56,7 +56,7 @@ localhost:8000/docs
 
 Try out the POST/moview_reviews_sentiment/ 
 
-In the parameter section, under Request body, send the following request:
+In the parameter section, under Request body, you send a request, such as:
 
 ```json
 {
@@ -69,8 +69,8 @@ In the parameter section, under Request body, send the following request:
 }
 
 ```
-Press the execute command, which run inference using the trained LSTM model. 
-The output of the inference will be seen in the Response Body
+Click the execute command, which executes inference using the trained LSTM model. 
+The output of the inference will be seen in the Response Body such as:
 
 ```json
 {
@@ -90,9 +90,6 @@ The output of the inference will be seen in the Response Body
 }
 
 ```
-
-### 3. Usage
-Open the terminal in the project directory
 
 
 
