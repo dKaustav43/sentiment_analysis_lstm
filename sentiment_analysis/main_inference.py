@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
 import time
-from vocab_and_encoding_functions import (tokenize_text,imdb_vocab, encode_tokens, 
+from .vocab_and_encoding_functions import (tokenize_text,imdb_vocab, encode_tokens, 
                                           pad_sequence, truncation)
-from lstm_model import LSTMClassifier
+from .lstm_model import LSTMClassifier
 
 def predict_sentiment_batch(
     texts: list[str], 
