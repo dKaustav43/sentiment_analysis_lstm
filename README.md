@@ -5,6 +5,8 @@ LSTM model for sentiment analysis on IMDB dataset.
 The data `imdb_dataset.csv` is taken from https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews.
 The data is in the data/ folder.
 
+To have a look at the dataset, basic Data and vocab characteristics, encoding and tensor generation - go to the folder **sentiment_analysis/quarto_reports** and open **sentiment_analysis.html** in your web browser. 
+
 ## Project Setup and Execution Guide
 
 This guide explains how to clone the repository, synchronize the environment,
