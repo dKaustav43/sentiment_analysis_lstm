@@ -7,3 +7,5 @@ experiment/
 sentiment_analysis_files
 .DS_Store
 *.egg-info/
+Dockerfile
+.dockerignore
