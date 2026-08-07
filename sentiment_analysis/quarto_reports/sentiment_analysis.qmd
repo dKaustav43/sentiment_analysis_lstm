@@ -28,7 +28,7 @@ os.chdir("../..")
 sys.path.append(os.getcwd())
 
 from great_tables import GT, style, loc
-from sentiment_analysis.load_imdb_data import load_imdb_data_into_df
+from sentiment_analysis.loading_imdb_train_test_val_split import load_imdb_data_into_df
 
 df_imdb = load_imdb_data_into_df().head(5)
 gt_imdb = GT(df_imdb)
@@ -85,7 +85,7 @@ gt_imdb = GT(df_imdb)
 ```
 # The Dataset Characteristics
 ```{python}
-from sentiment_analysis.load_imdb_data import load_imdb_data_into_df, train_test_val_set
+from sentiment_analysis.loading_imdb_train_test_val_split import load_imdb_data_into_df, train_test_val_set
 import pandas as pd
 
 df_imdb = load_imdb_data_into_df()
@@ -110,7 +110,7 @@ gt_dataset_charecteristics
 Descriptive stats of review column
 
 ```{python}
-from sentiment_analysis.pre_process_and_tokenize import preprocess_string
+from sentiment_analysis.vocab_and_encoding_functions import preprocess_string
 
 reviews_data = df_imdb['review']
 review_token_length = [len(preprocess_string(review).split()) for review in reviews_data]
@@ -194,7 +194,7 @@ print(f"The coverage for the top 20,000 is: {top_20k_coverage * 100:.2f}%")
 The datasets are encoded. Here is an example of an encoded review as a numpy array!
 
 ```{python}
-from sentiment_analysis.vocab_and_encoding import encode_train_text_val_dataset
+from sentiment_analysis.vocab_and_encoding_functions import encode_train_text_val_dataset
 
 x_train_encoded, x_val_encoded, x_test_encoded = encode_train_text_val_dataset(
     x_train_data=x_train,x_val_data=x_val,x_test_data=x_test
