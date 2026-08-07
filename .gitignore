@@ -6,4 +6,4 @@ __pycache__/
 experiment/
 sentiment_analysis_files
 .DS_Store
-
+*.egg-info/
