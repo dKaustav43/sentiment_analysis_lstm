@@ -92,6 +92,17 @@ The output of the inference will be seen in the Response Body such as:
 }
 
 ```
+
+### 4. Run using Streamlit frontend
+
+A simple streamlit frontend (sentiment_analysis/streamlit_frontend.py)is created to get the sentiment out of a movie review using a simple and nice UI. Before running streamlit, make sure the fastapi server is running in the backend (step3).
+Run streamlit app using the following command -
+
+```zsh
+streamlit run sentiment_analysis/streamlit_frontend.py
+```
+Now you can enter a movie review in the box and click on run inference. 
+
 ## Run inference inside Docker container
 
 I have provided a docker file here. It installs uv, uses uv to install all the dependencies and we will use uv run to run the program. 
@@ -131,3 +142,4 @@ now, go to the brower and run **localhost:8000/docs** and you will see the fasta
 docker exec -it movie-review-sentiment-analysis sh
 ```
 
+**Note** - I have only included the Docker commands to spin up a fastapi server. For streamlit frontend, I will be making a docker compose file shortly. For now, the option of running streamlit frontend is not possible. 
