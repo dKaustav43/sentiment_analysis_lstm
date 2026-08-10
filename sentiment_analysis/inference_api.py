@@ -10,7 +10,9 @@ from typing import Literal
 device = torch.device("mps" if torch.mps.is_available() else "cpu")
 path_trained_model= "sentiment_analysis/trained_models/lstm_epoch_9.pt"
 lstm_model_instance = LSTMClassifier().to(device)
-lstm_model_instance.load_state_dict(torch.load(path_trained_model, weights_only=True))
+#use map_location to remap the present device. Necessary as the device on which the model is trained maynot be the device where the inference is running.
+state_dict = torch.load(path_trained_model, map_location=device, weights_only=True)
+lstm_model_instance.load_state_dict(state_dict)
 
 class ReviewsInput(BaseModel):
     movie_reviews: list[str]   
