@@ -1,10 +1,16 @@
-# FROM quay.io/jupyter/pytorch-notebook:latest
+FROM python:3.14-trixie
 
-# WORKDIR /home/jovyan/work
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# COPY pyproject.toml .
-# RUN pip install uv && uv pip install --system -r pyproject.toml
+WORKDIR /app
 
-# COPY sentiment_analysis.ipynb .
+COPY pyproject.toml uv.lock /app/
 
-# CMD ["jupyter", "lab", "--ip=0.0.0.0", "--no-browser", "--allow-root"]
+RUN uv sync --locked
+
+COPY . . 
+
+EXPOSE 8000 
+# port for fastapi
+
+CMD ["sleep", "infinity"]

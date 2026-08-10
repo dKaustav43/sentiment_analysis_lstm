@@ -2,6 +2,8 @@
 .git/
 __pycache__/
 .ipynb_checkpoints/
-uv.lock
-imdb_dataset.csv
+experimental/
+*.egg-info
+quarto_reports/
+.python-version
 simple_rnn_tutorial.ipynb
