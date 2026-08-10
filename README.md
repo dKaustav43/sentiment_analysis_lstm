@@ -92,6 +92,42 @@ The output of the inference will be seen in the Response Body such as:
 }
 
 ```
+## Run inference inside Docker container
 
+I have provided a docker file here. It installs uv, uses uv to install all the dependencies and we will use uv run to run the program. 
 
+Docker image needs to be build here. I have not shared the image on the docker hub. 
+
+1. Build the Docker image
+
+```sh
+docker build -t movie-sentiment-analysis:1.0 .
+```
+check the image is built successfully using 
+```sh
+docker image ls
+```
+
+2. Run the Docker container
+
+```sh
+docker run -d -p 8000:8000 --name movie-review-sentiment-analysis movie-sentiment-analysis:1.0
+```
+check that the container is running using the following command in your terminal
+
+```sh
+docker ps
+```
+3. Run the fastapi endpoint using UV from inside the container. In your terminal, run the following command - 
+
+```sh
+docker exec -it movie-review-sentiment-analysis uv run fastapi run sentiment_analysis/inference_api.py --host 0.0.0.0 --port 8000
+```
+now, go to the brower and run **localhost:8000/docs** and you will see the fastapi docs where you can execute the inference and try it out just as described above.
+
+4. To debug or run other parts of the application from inside the container, spin up a bash terminal from within the container using the following command -
+
+```sh 
+docker exec -it movie-review-sentiment-analysis sh
+```
 
