@@ -1,5 +1,5 @@
-import streamlit as st
 import requests
+import streamlit as st
 
 st.title("🎬 Movie Review Sentiment Analysis")
 user_review = st.text_area("Enter your movie review:")

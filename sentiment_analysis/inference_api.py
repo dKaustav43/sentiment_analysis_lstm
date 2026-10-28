@@ -1,11 +1,12 @@
-from fastapi import FastAPI
-from .main_inference import predict_sentiment_batch
-import torch
 import time
-from .lstm_model import LSTMClassifier
-from pydantic import BaseModel
-from datetime import datetime
 from typing import Literal
+
+import torch
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+from .lstm_model import LSTMClassifier
+from .main_inference import predict_sentiment_batch
 
 device = torch.device("mps" if torch.mps.is_available() else "cpu")
 path_trained_model= "sentiment_analysis/trained_models/lstm_epoch_9.pt"
@@ -28,6 +29,10 @@ class PublicOutput(BaseModel):
 
 
 app = FastAPI()
+
+@app.get("/", include_in_schema=False)
+def health():
+    return {"status": "ok"}
 
 @app.post("/movie_reviews_sentiment/", response_model = PublicOutput)
 def infer_movie_sentiment(payload:ReviewsInput):
