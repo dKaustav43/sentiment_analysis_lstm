@@ -13,4 +13,4 @@ COPY . .
 EXPOSE 8000 
 # port for fastapi
 
-CMD ["sleep", "infinity"]
+CMD ["uv", "run", "uvicorn", "sentiment_analysis.inference_api.py", "--host", "0.0.0.0", "--port", "8000"]
