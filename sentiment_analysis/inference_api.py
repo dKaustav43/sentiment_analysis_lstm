@@ -8,11 +8,18 @@ from pydantic import BaseModel
 from .lstm_model import LSTMClassifier
 from .main_inference import predict_sentiment_batch
 
+# add a lifespan here. 
 device = torch.device("mps" if torch.mps.is_available() else "cpu")
+## the device is CPU for local dev and AWS instance for the new deployment. 
+
+## two paths - one local for prod and the other S3 bucket to store the model.
 path_trained_model= "sentiment_analysis/trained_models/lstm_epoch_9.pt"
+
 lstm_model_instance = LSTMClassifier().to(device)
-#use map_location to remap the present device. Necessary as the device on which the model is trained maynot be the device where the inference is running.
+## use map_location to remap the present device. Necessary as the device on which the model is trained maynot be the device where the inference is running.
 state_dict = torch.load(path_trained_model, map_location=device, weights_only=True)
+
+## make this such that multiple models can be loaded.
 lstm_model_instance.load_state_dict(state_dict)
 
 class ReviewsInput(BaseModel):
