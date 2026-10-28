@@ -1,4 +1,5 @@
 import time
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal, Protocol
 
@@ -11,18 +12,35 @@ from pydantic import BaseModel
 from .lstm_model import LSTMClassifier
 from .main_inference import predict_sentiment_batch
 
-# add a lifespan here. 
+path_trained_model= "sentiment_analysis/trained_models/lstm_epoch_9.pt"
+
+ml_models = {}
+# add a lifespan here.
+@asynccontextmanager
+async def lifespan(app:FastAPI):
+    ## the device is CPU for local dev and AWS instance for the new deployment. 
+    device = torch.device("mps" if torch.mps.is_available() else "cpu")
+    lstm_model_instance = LSTMClassifier().to(device)
+    state_dict = torch.load(path_trained_model, map_location=device, weights_only=True)
+    lstm_model_instance.load_state_dict(state_dict)
+    lstm_model_instance.eval()
+    
+    ml_models["device"] = device
+    ml_models["model"] = lstm_model_instance
+    
+    yield
+
+    ml_models.clear()
 
 
-## the device is CPU for local dev and AWS instance for the new deployment. 
 ## use map_location to remap the present device. Necessary as the device on which the model is trained maynot be the device where the inference is running.
 path_trained_model= "sentiment_analysis/trained_models/lstm_epoch_9.pt"
 device = torch.device("mps" if torch.mps.is_available() else "cpu")
 state_dict = torch.load(path_trained_model, map_location=device, weights_only=True)
 
 ## make this such that multiple models can be loaded.
-lstm_model_instance = LSTMClassifier().to(device)
-lstm_model_instance.load_state_dict(state_dict)
+
+
 
 ## two paths - one local for prod and the other S3 bucket to store the model.
 class ModelStore(Protocol):
@@ -75,7 +93,7 @@ class PublicOutput(BaseModel):
     inference_time:str
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/", include_in_schema=False)
 def health():
@@ -96,6 +114,8 @@ def infer_movie_sentiment(payload:ReviewsInput):
     Output: 
     """
     start_inference_time = time.perf_counter()
+    device = ml_models["device"]
+    lstm_model_instance = ml_models["model"]
     results = predict_sentiment_batch(texts=payload.movie_reviews,
                                      classifier_model=lstm_model_instance,
                                      device=device)
