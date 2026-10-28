@@ -32,12 +32,6 @@ async def lifespan(app:FastAPI):
 
     ml_models.clear()
 
-
-## use map_location to remap the present device. Necessary as the device on which the model is trained maynot be the device where the inference is running.
-path_trained_model= "sentiment_analysis/trained_models/lstm_epoch_9.pt"
-device = torch.device("mps" if torch.mps.is_available() else "cpu")
-state_dict = torch.load(path_trained_model, map_location=device, weights_only=True)
-
 ## make this such that multiple models can be loaded.
 
 
