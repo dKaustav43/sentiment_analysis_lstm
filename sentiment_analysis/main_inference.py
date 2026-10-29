@@ -1,9 +1,17 @@
-import torch
-import torch.nn as nn
 import time
-from .vocab_and_encoding_functions import (tokenize_text,imdb_vocab, encode_tokens, 
-                                          pad_sequence, truncation)
+
+import torch
+from torch import nn
+
 from .lstm_model import LSTMClassifier
+from .vocab_and_encoding_functions import (
+    encode_tokens,
+    imdb_vocab,
+    pad_sequence,
+    tokenize_text,
+    truncation,
+)
+
 
 def predict_sentiment_batch(
     texts: list[str], 
