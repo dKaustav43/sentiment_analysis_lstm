@@ -1,3 +1,4 @@
+import io
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -13,28 +14,6 @@ from .lstm_model import LSTMClassifier
 from .main_inference import predict_sentiment_batch
 
 path_trained_model= "sentiment_analysis/trained_models/lstm_epoch_9.pt"
-
-ml_models = {}
-# add a lifespan here.
-@asynccontextmanager
-async def lifespan(app:FastAPI):
-    ## the device is CPU for local dev and AWS instance for the new deployment. 
-    device = torch.device("mps" if torch.mps.is_available() else "cpu")
-    lstm_model_instance = LSTMClassifier().to(device)
-    state_dict = torch.load(path_trained_model, map_location=device, weights_only=True)
-    lstm_model_instance.load_state_dict(state_dict)
-    lstm_model_instance.eval()
-    
-    ml_models["device"] = device
-    ml_models["model"] = lstm_model_instance
-    
-    yield
-
-    ml_models.clear()
-
-## make this such that multiple models can be loaded.
-
-
 
 ## two paths - one local for prod and the other S3 bucket to store the model.
 class ModelStore(Protocol):
@@ -73,6 +52,24 @@ class S3ModelStore:
             if e.response['Error']['Code'] == "NoSuchKey":
                 print(f"Key {self.key} not found")
             raise            
+
+ml_models = {}
+@asynccontextmanager
+async def lifespan(app:FastAPI):
+    ## the device is CPU for local dev and AWS instance for the new deployment. 
+    device = torch.device("mps" if torch.mps.is_available() else "cpu")
+    lstm_model_instance = LSTMClassifier().to(device)
+    local_lstm_model = LocalModelStore(path_trained_model)
+    state_dict = torch.load(io.BytesIO(local_lstm_model.load_bytes()), map_location=device, weights_only=True)
+    lstm_model_instance.load_state_dict(state_dict)
+    lstm_model_instance.eval()
+    
+    ml_models["device"] = device
+    ml_models["model"] = lstm_model_instance
+    
+    yield
+
+    ml_models.clear()
 
 class ReviewsInput(BaseModel):
     movie_reviews: list[str]   
