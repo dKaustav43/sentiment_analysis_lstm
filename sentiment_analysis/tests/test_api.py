@@ -25,11 +25,15 @@ def test_server_running():
     assert response.json() == {"status" : "ok"}
         
 #test 2: check the output of the predict sentiment endpoint (sync) in app 
-@pytest.mark.skip("This test is failing. Need to configure the lifespan event.") 
+def test_infer_movie_sentiment_over_server():
+    r = httpx.post("http://0.0.0.0:8000/movie_reviews_sentiment/", json={"movie_reviews": ["This movie is great!"]})
+    assert r.status_code == 200
+    
+@pytest.mark.skip("This test is failing. Need to configure the lifespan event most probably.") 
 def test_infer_movie_sentiment():
-    # this test is going to fail as it is not going to run the lifespan event hence 
-    # it cannot load the model and pass it
     response = client.post("/movie_reviews_sentiment/",
                            json = {"movie_reviews" :["The movie was great!"]})
     assert response.status_code == 200
+
+
 #test 3: Test the lifespan event
